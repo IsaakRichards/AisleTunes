@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AisleTunes</string>
+    <string name="station">Walmart &amp; Sam\'s Club Radio</string>
+    <string name="play">Play radio</string>
+    <string name="stop">Stop radio</string>
+    <string name="status_idle">Tap to tune in</string>
+    <string name="status_buffering">Tuning in…</string>
+    <string name="status_live">On air</string>
+    <string name="status_error">Couldn\'t reach the station. Tap to retry.</string>
+    <string name="waiting_title">Tuning the dial…</string>
+    <string name="waiting_artist">Waiting for the station to announce a song</string>
+    <string name="recently_played">RECENTLY PLAYED</string>
+    <string name="history_empty">Songs will appear here as they air.</string>
+</resources>

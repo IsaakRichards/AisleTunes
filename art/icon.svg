@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="108" height="108">
+  <rect width="108" height="108" fill="#0B2A5B"/>
+  <circle cx="54" cy="54" r="40" fill="#123A7A"/>
+  <!-- sparkles -->
+  <path d="M30,30 l1.6,3.4 3.4,1.6 -3.4,1.6 -1.6,3.4 -1.6,-3.4 -3.4,-1.6 3.4,-1.6z" fill="#FFC220"/>
+  <path d="M80,30 l1,2.2 2.2,1 -2.2,1 -1,2.2 -1,-2.2 -2.2,-1 2.2,-1z" fill="#F4F7FF"/>
+  <!-- notes rising from cart -->
+  <g fill="#F4F7FF">
+    <path d="M49,26 L71,21 L71,27 L49,32 Z"/>
+    <path d="M49,26 h3 v16 h-3 z"/>
+    <path d="M68,21 h3 v16 h-3 z"/>
+    <g transform="rotate(-20 47 42)"><path d="M41.5,42 a5.5,4 0 1,0 11,0 a5.5,4 0 1,0 -11,0 z"/></g>
+    <g transform="rotate(-20 66 37)"><path d="M60.5,37 a5.5,4 0 1,0 11,0 a5.5,4 0 1,0 -11,0 z"/></g>
+  </g>
+  <!-- cart -->
+  <path d="M27,46 L34,46 L41,70 L44,75 L77,75" fill="none" stroke="#FFC220" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M36,52 L84,52 L78,70 L41,70 Z" fill="#FFC220" stroke="#FFC220" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M48,55 L49.5,67 M60,55 L60,67 M72,55 L70.5,67" stroke="#0B2A5B" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+  <path d="M43,82 a4.5,4.5 0 1,0 9,0 a4.5,4.5 0 1,0 -9,0 z M68,82 a4.5,4.5 0 1,0 9,0 a4.5,4.5 0 1,0 -9,0 z" fill="#FFC220"/>
+</svg>

@@ -1,0 +1,70 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Work out version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "VERSION_NAME=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+          else
+            echo "VERSION_NAME=1.0.0-dev.${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+          fi
+          echo "VERSION_CODE=${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+
+      - name: Use private signing key if configured
+        env:
+          KEYSTORE_B64: ${{ secrets.AISLETUNES_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.AISLETUNES_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.AISLETUNES_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.AISLETUNES_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+            {
+              echo "AISLETUNES_KEYSTORE_FILE=$RUNNER_TEMP/release.keystore"
+              echo "AISLETUNES_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD"
+              echo "AISLETUNES_KEY_ALIAS=$KEY_ALIAS"
+              echo "AISLETUNES_KEY_PASSWORD=$KEY_PASSWORD"
+            } >> "$GITHUB_ENV"
+          fi
+
+      - name: Build APK
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleRelease
+          mkdir -p out
+          cp app/build/outputs/apk/release/app-release.apk "out/AisleTunes-${VERSION_NAME}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AisleTunes-${{ env.VERSION_NAME }}
+          path: out/*.apk
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" out/*.apk \
+            --title "AisleTunes $GITHUB_REF_NAME" \
+            --notes-file .github/release-notes.md

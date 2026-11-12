@@ -1,0 +1,20 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- sparkles -->
+    <path android:fillColor="#FFFFFF" android:pathData="M30,30l1.6,3.4l3.4,1.6l-3.4,1.6l-1.6,3.4l-1.6,-3.4l-3.4,-1.6l3.4,-1.6z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M80,30l1,2.2l2.2,1l-2.2,1l-1,2.2l-1,-2.2l-2.2,-1l2.2,-1z" />
+    <!-- beamed notes rising out of the cart -->
+    <path android:fillColor="#FFFFFF" android:pathData="M49,26L71,21L71,27L49,32Z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M49,26h3v16h-3z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M68,21h3v16h-3z" />
+    <group android:rotation="-20" android:pivotX="47" android:pivotY="42">
+        <path android:fillColor="#FFFFFF" android:pathData="M41.5,42a5.5,4 0,1 0,11 0a5.5,4 0,1 0,-11 0z" />
+    </group>
+    <group android:rotation="-20" android:pivotX="66" android:pivotY="37">
+        <path android:fillColor="#FFFFFF" android:pathData="M60.5,37a5.5,4 0,1 0,11 0a5.5,4 0,1 0,-11 0z" />
+    </group>
+    <!-- shopping cart -->
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="4.5" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000" android:pathData="M27,46L34,46L41,70L44,75L77,75" />
+    <path android:fillColor="#FFFFFF" android:strokeColor="#FFFFFF" android:strokeWidth="2" android:strokeLineJoin="round" android:pathData="M36,52L84,52L78,70L41,70Z" />
+    <path android:strokeColor="#00000000" android:strokeWidth="2.6" android:strokeLineCap="round" android:fillColor="#00000000" android:pathData="M48,55L49.5,67M60,55L60,67M72,55L70.5,67" />
+    <path android:fillColor="#FFFFFF" android:pathData="M43,82a4.5,4.5 0,1 0,9 0a4.5,4.5 0,1 0,-9 0zM68,82a4.5,4.5 0,1 0,9 0a4.5,4.5 0,1 0,-9 0z" />
+</vector>
