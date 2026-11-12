@@ -18,8 +18,14 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.extractor.metadata.icy.IcyInfo
+import androidx.media3.session.LibraryResult
+import androidx.media3.session.MediaLibraryService
+import androidx.media3.session.MediaLibraryService.LibraryParams
+import androidx.media3.session.MediaLibraryService.MediaLibrarySession
 import androidx.media3.session.MediaSession
-import androidx.media3.session.MediaSessionService
+import com.google.common.collect.ImmutableList
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,9 +33,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 @OptIn(UnstableApi::class)
-class RadioService : MediaSessionService() {
+class RadioService : MediaLibraryService() {
 
-    private var session: MediaSession? = null
+    private var session: MediaLibrarySession? = null
     private lateinit var exo: ExoPlayer
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val handler = Handler(Looper.getMainLooper())
@@ -80,7 +86,9 @@ class RadioService : MediaSessionService() {
             Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
-        session = MediaSession.Builder(this, player).setSessionActivity(openApp).build()
+        session = MediaLibrarySession.Builder(this, player, LibraryCallback())
+            .setSessionActivity(openApp)
+            .build()
 
         scope.launch { MetadataStream.songs().collect { onSong(it) } }
     }
@@ -101,13 +109,17 @@ class RadioService : MediaSessionService() {
         if (exo.mediaItemCount > 0) exo.replaceMediaItem(0, item) else exo.setMediaItem(item)
     }
 
+    private val stationArt: Uri by lazy {
+        Uri.parse("android.resource://$packageName/drawable/station_art")
+    }
+
     private fun mediaItem(t: Track?): MediaItem {
         val meta = MediaMetadata.Builder()
             .setStation(Station.NAME)
             .setTitle(t?.title ?: Station.NAME)
             .setArtist(t?.artist?.ifBlank { null } ?: if (t == null) "Live" else Station.NAME)
             .setAlbumTitle(t?.album?.ifBlank { null } ?: Station.NAME)
-            .setArtworkUri(t?.artUrl?.let { Uri.parse(it) })
+            .setArtworkUri(t?.artUrl?.let { Uri.parse(it) } ?: stationArt)
             .setIsPlayable(true)
             .setIsBrowsable(false)
             .setMediaType(MediaMetadata.MEDIA_TYPE_RADIO_STATION)
@@ -119,7 +131,81 @@ class RadioService : MediaSessionService() {
             .build()
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = session
+    /** The station as a tile in Android Auto's browse list. */
+    private fun stationTile(): MediaItem = MediaItem.Builder()
+        .setMediaId(STATION_ID)
+        .setMediaMetadata(
+            MediaMetadata.Builder()
+                .setTitle(Station.NAME)
+                .setSubtitle("Live")
+                .setArtworkUri(stationArt)
+                .setIsPlayable(true)
+                .setIsBrowsable(false)
+                .setMediaType(MediaMetadata.MEDIA_TYPE_RADIO_STATION)
+                .build(),
+        )
+        .build()
+
+    private inner class LibraryCallback : MediaLibrarySession.Callback {
+        override fun onGetLibraryRoot(
+            session: MediaLibrarySession,
+            browser: MediaSession.ControllerInfo,
+            params: LibraryParams?,
+        ): ListenableFuture<LibraryResult<MediaItem>> {
+            val root = MediaItem.Builder()
+                .setMediaId(ROOT_ID)
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle("AisleTunes")
+                        .setIsPlayable(false)
+                        .setIsBrowsable(true)
+                        .setMediaType(MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)
+                        .build(),
+                )
+                .build()
+            return Futures.immediateFuture(LibraryResult.ofItem(root, params))
+        }
+
+        override fun onGetChildren(
+            session: MediaLibrarySession,
+            browser: MediaSession.ControllerInfo,
+            parentId: String,
+            page: Int,
+            pageSize: Int,
+            params: LibraryParams?,
+        ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
+            val items = if (parentId == ROOT_ID) ImmutableList.of(stationTile()) else ImmutableList.of()
+            return Futures.immediateFuture(LibraryResult.ofItemList(items, params))
+        }
+
+        override fun onGetItem(
+            session: MediaLibrarySession,
+            browser: MediaSession.ControllerInfo,
+            mediaId: String,
+        ): ListenableFuture<LibraryResult<MediaItem>> =
+            Futures.immediateFuture(LibraryResult.ofItem(stationTile(), null))
+
+        // Cars hand back only the tile's ID; swap in the real stream.
+        override fun onAddMediaItems(
+            mediaSession: MediaSession,
+            controller: MediaSession.ControllerInfo,
+            mediaItems: MutableList<MediaItem>,
+        ): ListenableFuture<MutableList<MediaItem>> =
+            Futures.immediateFuture(mutableListOf(mediaItem(NowPlaying.current.value)))
+
+        // "Play" from Bluetooth or the car when the app isn't running.
+        override fun onPlaybackResumption(
+            mediaSession: MediaSession,
+            controller: MediaSession.ControllerInfo,
+        ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> =
+            Futures.immediateFuture(
+                MediaSession.MediaItemsWithStartPosition(
+                    listOf(mediaItem(NowPlaying.current.value)), 0, C.TIME_UNSET,
+                ),
+            )
+    }
+
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? = session
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         val p = session?.player
@@ -135,6 +221,11 @@ class RadioService : MediaSessionService() {
         }
         session = null
         super.onDestroy()
+    }
+
+    private companion object {
+        const val ROOT_ID = "root"
+        const val STATION_ID = "walmart-sams-club-radio"
     }
 
     /** Rejoins the live broadcast after a long pause instead of playing stale audio. */

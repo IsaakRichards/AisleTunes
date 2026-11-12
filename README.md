@@ -20,6 +20,7 @@ AisleTunes is a tiny Android app that tunes straight into the in-store radio net
 - **Now playing**: song title, artist, album, year and cover art
 - **Recently played**: the last six songs with the time each one aired
 - **Background playback** with lock-screen, notification and Bluetooth controls
+- **Android Auto**: the station appears on your car's screen with song info and cover art
 - **Always live**: after a long pause it rejoins the broadcast instead of playing old audio
 
 ## Install
@@ -29,6 +30,15 @@ AisleTunes is a tiny Android app that tunes straight into the in-store radio net
 3. If Android asks, allow installs from your browser.
 
 Requires Android 8.0 or newer.
+
+### Android Auto
+
+Android Auto hides apps that weren't installed from the Play Store. To see AisleTunes in your car:
+
+1. On your phone, open Android Auto's settings.
+2. Tap **Version** about ten times until developer settings unlock.
+3. Open the ⋮ menu → **Developer settings** and turn on **Unknown sources**.
+4. Restart Android Auto. AisleTunes appears in the car's app list.
 
 ## How it works
 
