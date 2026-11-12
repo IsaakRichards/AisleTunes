@@ -40,7 +40,7 @@ A browser version of the same player lives in [`web/index.html`](web/index.html)
 
 ## Building
 
-Every push to `main` builds an APK in GitHub Actions. Pushing a tag like `v1.0.1` builds and publishes a release.
+Every push to `main` builds an APK in GitHub Actions. To ship a new release, bump the number in `version.txt` (for example `1.0.1`) and push: the workflow publishes `v1.0.1` with the APK attached. Pushing a tag like `v1.0.1` works too.
 
 ```sh
 ./gradlew assembleRelease
